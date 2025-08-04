@@ -1,168 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drive Link Converter</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Google Drive Direct Download Link Converter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
     body {
+      font-family: Arial, sans-serif;
+      background: #f8f8f8;
       margin: 0;
-      padding: 2rem;
-      background: #f9f9f9;
-      color: #333;
+      padding: 20px;
     }
+
     .container {
-      max-width: 700px;
+      max-width: 750px;
       margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      background: white;
+      padding: 25px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
+
     h2 {
-      margin-bottom: 1rem;
+      text-align: center;
+      margin-bottom: 20px;
     }
+
+    .input-box {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
     textarea {
       width: 100%;
       min-height: 150px;
-      max-height: 400px;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
       resize: vertical;
-      font-size: 0.95rem;
-      overflow-y: auto;
-    }
-    .buttons {
-      margin-top: 1rem;
-      display: flex;
-      gap: 1rem;
-    }
-    button {
-      padding: 0.6rem 1.2rem;
-      font-size: 0.95rem;
+      padding: 12px 40px 12px 12px;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-      position: relative;
-    }
-    button.convert {
-      background-color: #4CAF50;
-      color: white;
-    }
-    button.copy {
-      background-color: #2196F3;
-      color: white;
-    }
-    button.reset {
-      background-color: #f44336;
-      color: white;
-    }
-    .output {
-      margin-top: 1rem;
-    }
-    .output textarea {
-      background: #f0f0f0;
+      border-radius: 10px;
+      background: #f4f4f4;
+      font-family: monospace;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
     }
 
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #28a745;
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      z-index: 9999;
-      animation: fadeInOut 2.5s ease forwards;
-    }
-    .toast .close {
-      margin-left: auto;
+    .icon-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
       cursor: pointer;
+      font-size: 18px;
+      color: #444;
     }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(20px); }
-      10% { opacity: 1; transform: translateY(0); }
-      90% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(20px); }
+
+    .reset-btn {
+      width: 100%;
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-bottom: 15px;
+    }
+
+    .reset-btn.success {
+      background-color: #4caf50 !important;
+    }
+
+    .check {
+      color: green;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Google Drive Direct Download Link Converter</h2>
-    <textarea id="inputLinks" placeholder="Paste Google Drive link(s) here, one per line..." oninput="autoResize(this)"></textarea>
-    <div class="buttons">
-      <button class="convert" onclick="convertLinks(this)">Convert</button>
-      <button class="copy" onclick="copyOutput(this)">Copy</button>
-      <button class="reset" onclick="resetAll(this)">Reset</button>
+
+    <div class="input-box">
+      <textarea id="input" placeholder="Paste Google Drive link(s) here, one per line..."></textarea>
+      <button class="icon-btn" onclick="pasteText(this)" title="Paste">
+        <i class="fa-solid fa-paste"></i>
+      </button>
     </div>
-    <div class="output">
-      <textarea id="outputLinks" readonly placeholder="Converted direct download links will appear here..." oninput="autoResize(this)"></textarea>
+
+    <button class="reset-btn" onclick="resetForm(this)">Reset</button>
+
+    <div class="input-box">
+      <textarea id="output" placeholder="Converted direct download links will appear here..."></textarea>
+      <button class="icon-btn" onclick="copyText(this)" title="Copy">
+        <i class="fa-solid fa-copy"></i>
+      </button>
     </div>
   </div>
 
   <script>
-    function showToast(message) {
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.innerHTML = `<span>\u2714</span> <span>${message}</span> <span class="close" onclick="this.parentElement.remove()">&times;</span>`;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.remove();
-      }, 2500);
+    function convertLinks(text) {
+      return text.split('\n').map(line => {
+        const match = line.match(/(?:\/d\/|id=)([\w-]{25,})/);
+        return match ? `https://drive.google.com/uc?export=download&id=${match[1]}` : '';
+      }).filter(Boolean).join('\n');
     }
 
-    function autoResize(textarea) {
-      const lines = textarea.value.split("\n").length;
-      const lineHeight = 24;
-      const maxLines = 10;
-      const newHeight = Math.min(lines, maxLines) * lineHeight + 24;
-      textarea.style.height = newHeight + "px";
-    }
+    document.getElementById('input').addEventListener('input', function () {
+      const output = convertLinks(this.value);
+      document.getElementById('output').value = output;
+    });
 
-    function convertLinks(btn) {
-      const inputArea = document.getElementById("inputLinks");
-      const input = inputArea.value.trim();
-      const lines = input.split(/\n|\r/).filter(line => line.trim() !== "");
-      const output = lines.map(link => {
-        const match = link.match(/[-\w]{25,}/);
-        if (match) {
-          return `https://drive.google.com/uc?export=download&id=${match[0]}`;
-        } else {
-          return `Invalid link: ${link}`;
-        }
-      });
-      const outputArea = document.getElementById("outputLinks");
-      outputArea.value = output.join("\n");
-      autoResize(outputArea);
-      showToast("Links converted successfully!");
-    }
-
-    function copyOutput(btn) {
-      const output = document.getElementById("outputLinks");
+    function copyText(btn) {
+      const output = document.getElementById('output');
       output.select();
-      document.execCommand("copy");
-      showToast("File Download URL copied!");
+      document.execCommand('copy');
+      showCheck(btn);
     }
 
-    function resetAll(btn) {
-      const inputArea = document.getElementById("inputLinks");
-      const outputArea = document.getElementById("outputLinks");
-      inputArea.value = "";
-      outputArea.value = "";
-      autoResize(inputArea);
-      autoResize(outputArea);
-      showToast("Fields reset successfully.");
+    function pasteText(btn) {
+      navigator.clipboard.readText().then(text => {
+        document.getElementById('input').value = text;
+        const event = new Event('input');
+        document.getElementById('input').dispatchEvent(event);
+        showCheck(btn);
+      });
+    }
+
+    function resetForm(btn) {
+      document.getElementById('input').value = '';
+      document.getElementById('output').value = '';
+      btn.classList.add('success');
+      showCheck(btn, true);
+      setTimeout(() => {
+        btn.classList.remove('success');
+      }, 1500);
+    }
+
+    function showCheck(btn, isReset = false) {
+      const icon = btn.querySelector('i');
+      if (!icon) return;
+      const original = icon.className;
+      icon.className = 'fa-solid fa-check check';
+      setTimeout(() => {
+        icon.className = original;
+      }, 1500);
     }
   </script>
 </body>
