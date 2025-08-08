@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  workflow_dispatch: # manual run from Actions tab
+  schedule:
+    - cron: "0 0 * * *" # runs daily at midnight UTC
 
 jobs:
   build:
@@ -25,6 +27,7 @@ jobs:
           curl -L https://github.com/vikask2y2/google-drive-direct-link-generator/archive/refs/heads/main.zip -o p1.zip
           unzip p1.zip -d temp1
           mv temp1/*/* project1/ || mv temp1/* project1/
+          rm -rf project1/.git project1/.github project1/CNAME
           rm -rf temp1 p1.zip
 
       - name: Download Project 2 files
@@ -33,6 +36,7 @@ jobs:
           curl -L https://github.com/vikask2y2/permalink-generator/archive/refs/heads/main.zip -o p2.zip
           unzip p2.zip -d temp2
           mv temp2/*/* project2/ || mv temp2/* project2/
+          rm -rf project2/.git project2/.github project2/CNAME
           rm -rf temp2 p2.zip
 
       - name: Commit updated projects
