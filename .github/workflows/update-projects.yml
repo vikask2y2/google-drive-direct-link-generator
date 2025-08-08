@@ -1,0 +1,38 @@
+name: Update Projects
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main site
+        uses: actions/checkout@v4
+
+      - name: Remove old project folders
+        run: |
+          rm -rf project1
+          rm -rf project2
+
+      - name: Pull latest LinkFilter
+        run: |
+          git clone --depth=1 https://github.com/vikask2y2/LinkFilter.git LinkFilter
+          rm -rf LinkFilter/.git
+
+      - name: Pull latest permalink-generator
+        run: |
+          git clone --depth=1 https://github.com/vikask2y2/permalink-generator.git permalink-generator
+          rm -rf permalink-generator/.git
+
+      - name: Commit updated projects
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update projects from source repos" || echo "No changes"
+          git push
