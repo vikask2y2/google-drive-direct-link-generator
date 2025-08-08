@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,15 +19,21 @@ jobs:
           rm -rf project1
           rm -rf project2
 
-      - name: Pull latest Project 1
+      - name: Download Project 1 files
         run: |
-          git clone --depth=1 https://github.com/vikask2y2/google-drive-direct-link-generator.git project1
-          rm -rf project1/.git
+          mkdir project1
+          curl -L https://github.com/vikask2y2/google-drive-direct-link-generator/archive/refs/heads/main.zip -o p1.zip
+          unzip p1.zip -d temp1
+          mv temp1/*/* project1/ || mv temp1/* project1/
+          rm -rf temp1 p1.zip
 
-      - name: Pull latest Project 2
+      - name: Download Project 2 files
         run: |
-          git clone --depth=1 https://github.com/vikask2y2/permalink-generator.git project2
-          rm -rf project2/.git
+          mkdir project2
+          curl -L https://github.com/vikask2y2/permalink-generator/archive/refs/heads/main.zip -o p2.zip
+          unzip p2.zip -d temp2
+          mv temp2/*/* project2/ || mv temp2/* project2/
+          rm -rf temp2 p2.zip
 
       - name: Commit updated projects
         run: |
