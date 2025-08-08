@@ -19,15 +19,15 @@ jobs:
           rm -rf project1
           rm -rf project2
 
-      - name: Pull latest LinkFilter
+      - name: Pull latest Project 1
         run: |
-          git clone --depth=1 https://github.com/vikask2y2/LinkFilter.git LinkFilter
-          rm -rf LinkFilter/.git
+          git clone --depth=1 https://github.com/vikask2y2/google-drive-direct-link-generator.git project1
+          rm -rf project1/.git
 
-      - name: Pull latest permalink-generator
+      - name: Pull latest Project 2
         run: |
-          git clone --depth=1 https://github.com/vikask2y2/permalink-generator.git permalink-generator
-          rm -rf permalink-generator/.git
+          git clone --depth=1 https://github.com/vikask2y2/permalink-generator.git project2
+          rm -rf project2/.git
 
       - name: Commit updated projects
         run: |
